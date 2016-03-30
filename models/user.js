@@ -11,7 +11,7 @@ User.prototype.save = function(callback){
     //要存入数据库的文档
     var user = {
         name: this.name,
-        password : this.possword,
+        password : this.password,
         email : this.email
     }
     //打开数据库
@@ -19,16 +19,16 @@ User.prototype.save = function(callback){
         if(err){
             return callback(err);//返回错误信息
         }
-        db.collection(users,function(err,collection){
+        db.collection('users',function(err,collection){
             if(err){
                 mongodb.close();
                 return callback(err);
             }
             //将用户数据插入users集合
-            collection.insert(uers,{
+            collection.insert(user,{
                 safe:true
             },function(err,user){
-                mongodb.close();;
+                mongodb.close();
                 if(err){
                     return callback(err);
                 }
