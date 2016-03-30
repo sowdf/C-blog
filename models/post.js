@@ -59,7 +59,7 @@ Post.get = function(name,callback){
                 mongodb.close();
                 return callback(err);
             }
-            
+
             collection.findOne('name',{safe:true},function(err){
                 mongodb.close();
                 if(err){
