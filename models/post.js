@@ -59,12 +59,19 @@ Post.get = function(name,callback){
                 mongodb.close();
                 return callback(err);
             }
-
-            collection.findOne('name',{safe:true},function(err){
+            var query = {}
+            if(name){
+                query.name = name;
+            }
+            //根据query对象查询文章
+            collection.find(query).sort({
+                time : -1
+            }).toArray(function(err,docs){
                 mongodb.close();
                 if(err){
                     return callback(err);
                 }
+                callback(null,docs);//成功以数组的方式返回
 
             })
         })

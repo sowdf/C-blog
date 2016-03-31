@@ -1,5 +1,6 @@
 var crypto = require('crypto'),
-    User = require('../models/user.js');
+    User = require('../models/user.js'),
+    Post = require('../models/post.js');
 /* GET home page. */
 function checkLogin(req,res,next){
   if(!req.session.user){
@@ -18,12 +19,19 @@ function checkNotLogin(req,res,next){
 
 module.exports = function(app){
   app.get('/', function(req, res, next) {
-    res.render('index', {
-      title:'主页',
-      user:req.session.user,
-      success:req.flash('success').toString(),
-      error:req.flash('error').toString()
-    });
+      Post.get(null,function(err,posts){
+          if(err){
+              posts = [];
+          }
+          res.render('index', {
+              title:'主页',
+              posts:posts,
+              user:req.session.user,
+              success:req.flash('success').toString(),
+              error:req.flash('error').toString()
+          });
+      })
+
   });
   app.get('/reg',checkNotLogin);
   app.get('/reg', function(req, res, next) {
@@ -113,6 +121,16 @@ module.exports = function(app){
   });
   app.get('/post',checkLogin);
   app.post('/post', function (req, res) {
+      var currentUser = req.session.user,
+          post = new Post(currentUser.name,req.body.title,req.body.post);
+      post.save(function(err){
+          if(err){
+              req.flash('error',err);
+              return res.redirect('/');
+          }
+          req.flash('success','发布成功！');
+          res.redirect('/');//发表成功后跳转到主页
+      });
   });
   app.get('/logout',checkLogin);
   app.get('/logout', function (req, res) {
