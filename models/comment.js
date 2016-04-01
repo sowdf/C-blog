@@ -12,6 +12,7 @@ module.exports = Comment;
 Comment.prototype.save = function(callback){
     var name = this.name,
         day = this.day,
+        title = this.title,
         comment = this.comment;
     //打开数据库
     mongodb.open(function(err,db){
@@ -26,7 +27,7 @@ Comment.prototype.save = function(callback){
             //通过时间和用户名来增加一条留言
             collection.update({
                 'name':name,
-                'time,day':day,
+                'time.day':day,
                 'title':title
             },{$push:{comments:comment}},function(err){
                 mongodb.close();
