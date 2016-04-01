@@ -49,7 +49,7 @@ Post.prototype.save = function(callback){
     })
 }
 //读取文章信息
-Post.getAll = function(name,callback){
+Post.getTen = function(name,callback){
     //打开数据库
     mongodb.open(function(err,db){
         if(err){
@@ -65,20 +65,25 @@ Post.getAll = function(name,callback){
             if(name){
                 query.name = name;
             }
-            //根据query对象查询文章
-            collection.find(query).sort({
-                time : -1
-            }).toArray(function(err,docs){
-                mongodb.close();
-                if(err){
-                    return callback(err);
-                }
-                //解析markdown 为html
-                docs.forEach(function(doc){
-                    doc.post = markdown.toHTML(doc.post);
-                })
-                callback(null,docs);//成功以数组的方式返回
-
+            //使用count返回特定查询的文档书total
+            collection.count(query,function(err,total){
+                //根据query对象查询，并跳过前(page-1)*10个结果，返回之后的10个 结果
+                collection.find(quert,{
+                    skip:(page - 1) * 10,
+                    limit:10
+                }).sort({
+                    time:-1
+                }).toArray(function(err,docs){
+                    mongodb.close();
+                    if(err){
+                        return callback(err);
+                    }
+                    //解析 markdown 为 html
+                    docs.forEach(function (doc) {
+                        doc.post = markdown.toHTML(doc.post);
+                    });
+                    callback(null, docs, total);
+                });
             })
         })
     })
