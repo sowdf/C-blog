@@ -157,6 +157,21 @@ module.exports = function(app){
     req.flash('success','文件上传成功');
     res.redirect('/upload');
   });
+  app.get('/archive',function(req,res){
+    Post.getArchive(function(err,posts){
+      if(err){
+        req.flash('error',err);
+        return res.redirect('/');
+      }
+      res.render('archive',{
+        title : '存档',
+        posts : posts,
+        user : req.session.user,
+        success : req.flash('success').toString(),
+        error : req.flash('error').toString()
+      })
+    })
+  });
   app.get('/u/:name',function(req,res){
     User.get(req,params.name,function(err,user){
       if(!user){
@@ -258,9 +273,7 @@ module.exports = function(app){
       res.redirect('back');
     });
   });
-  app.get('/archive',function(req,res){
-    
-  })
+
 
 }
 

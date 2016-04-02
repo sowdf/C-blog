@@ -229,7 +229,7 @@ Post.getArchive = function(callback){
                 if(err){
                     return callback(err);
                 }
-                callback(docs);
+                callback(null,docs);
             })
         })
     })
