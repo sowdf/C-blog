@@ -40,7 +40,6 @@ module.exports = function(app){
     var name = req.body.name,
         password = req.body.password,
         password_re = req.body['password-repeat'];
-
     //检查用户两次输入密码是否一致
     if(password != password_re){
       req.flash('error','两次密码输入不一致');
@@ -191,13 +190,14 @@ module.exports = function(app){
     })
   })
   app.get('/u/:name',function(req,res){
-    User.get(req,params.name,function(err,user){
+    var page = parseInt(req.query.p) || 1;
+    User.get(req.params.name,function(err,user){
       if(!user){
         req.flash('error','用户不存在！');
         return res.redirect('/');
       }
       //查询并返回用户的所有文章
-      Post.getTen(user.name,function(err,posts,total){
+      Post.getTen(user.name,page,function(err,posts,total){
         if(err){
           req.flash('error',err);
           return res.redirect('/');
@@ -268,7 +268,8 @@ module.exports = function(app){
         error:req.flash('error').toString()
       })
     })
-  })
+  });
+
   app.post('/edit/:name/:day/:title',checkLogin);
   app.post('/edit/:name/:day/:title',function(req,res){
     var currentUser = req.session.user;
@@ -293,6 +294,28 @@ module.exports = function(app){
       req.flash('success','删除成功！');
       res.redirect('/');
     })
+  });
+  app.get('/reprint/:name/:day/:title', checkLogin);
+  app.get('/reprint/:name/:day/:title', function (req, res) {
+    Post.edit(req.params.name, req.params.day, req.params.title, function (err, post) {
+      if (err) {
+        req.flash('error', err);
+        return res.redirect(back);
+      }
+      var currentUser = req.session.user,
+          reprint_from = {name: post.name, day: post.time.day, title: post.title},
+          reprint_to = {name: currentUser.name, head: currentUser.head};
+      Post.reprint(reprint_from, reprint_to, function (err, post) {
+        if (err) {
+          req.flash('error', err);
+          return res.redirect('back');
+        }
+        req.flash('success', '转载成功!');
+        var url = encodeURI('/u/' + post.name + '/' + post.time.day + '/' + post.title);
+        //跳转到转载后的文章页面
+        res.redirect(url);
+      });
+    });
   });
   app.post('/u/:name/:day/:title',function(req,res){
     var date = new Date(),
