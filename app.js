@@ -10,8 +10,9 @@ var routes = require('./routes/index');
 var settings = require('./settings')
 var flash = require('connect-flash');
 var multer = require('multer');
-
-
+var fs = require('fs');
+var accessLog = fs.createWriteStream('access.log', {flags: 'a'});
+var errorLog = fs.createWriteStream('error.log', {flags: 'a'});
 var app = express();
 
 // view engine setup
@@ -27,12 +28,16 @@ app.use(multer({
     return filename;
   }
 }));
+app.use(logger({stream: accessLog}));
 app.use(flash());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+var fs = require('fs');
+var accessLog = fs.createWriteStream('access.log', {flags: 'a'});
+var errorLog = fs.createWriteStream('error.log', {flags: 'a'});
 
 app.use(session({
   secret : settings.cookieSecret,
@@ -49,6 +54,6 @@ app.use(session({
 
 routes(app);
 
-app.listen(app.get('port'),function(){
-  console.log('Express server listrning on port ' + app.get('port'));
+app.listen(80,function(){
+  console.log('Express server listrning on port ' + 80);
 });
